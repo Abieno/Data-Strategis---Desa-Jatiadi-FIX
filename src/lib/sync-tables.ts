@@ -224,7 +224,11 @@ export function normalizeRow(
   const payload: SyncRow = {};
 
   for (const [key, value] of Object.entries(raw)) {
+    // Kolom terkelola sistem + metadata Apps Script (mis. "_row") tidak boleh ikut
+    // dikirim sebagai kolom tabel — kalau lolos, upsert akan gagal untuk tabel yang
+    // tidak punya kolom tsb.
     if (key === "created_at" || key === "updated_at" || key === "id") continue;
+    if (key.startsWith("_")) continue;
     payload[key] = typeof value === "string" ? value.trim() : value;
   }
 
