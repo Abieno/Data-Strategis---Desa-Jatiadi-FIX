@@ -1,0 +1,27 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Jatiadi",
+        "kecamatan": "Gending",
+        "kabupaten": "Probolinggo",
+        "provinsi": "Jawa Timur",
+        "catatan": "PLACEHOLDER — ini kotak perkiraan di sekitar titik pin Google Maps, BUKAN batas administrasi desa yang sebenarnya. Ganti geometry.coordinates ini dengan data batas resmi (BIG/Ina-Geoportal, Kemendagri, atau relasi boundary OSM) begitu tersedia."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [7.7925, 113.35194],
+            [113.35516275555555, -7.7962566],
+            [113.35516275555555, -7.7852566],
+            [113.34405164444443, -7.7852566],
+            [113.34405164444443, -7.7962566]
+          ]
+        ]
+      }
+    }
+  ]
+}
