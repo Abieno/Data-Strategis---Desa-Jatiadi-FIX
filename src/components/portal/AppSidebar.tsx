@@ -25,13 +25,17 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-1 py-1.5">
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
-            <Database className="size-5" aria-hidden />
+          <span className="">
+            <img
+              src="https://res.cloudinary.com/dfivdsuba/image/upload/v1786144984/logo_pemkab_jzhynq.svg"
+              alt="Logo Pemerintah Kabupaten Probolinggo"
+              className="size-7 object-contain"
+            />
           </span>
           {!collapsed ? (
             <div className="min-w-0">
-              <p className="truncate font-display text-sm font-bold leading-tight">Desa Cantik</p>
-              <p className="truncate text-xs text-sidebar-foreground/70">Portal Data Jatiadi</p>
+              <p className="truncate font-display text-sm font-bold leading-tight">Desa Jatiadi</p>
+              <p className="truncate text-xs text-sidebar-foreground/70">Kecamatan Gending</p>
             </div>
           ) : null}
         </div>
@@ -62,7 +66,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border">
         {!collapsed ? (
           <p className="px-2 py-1 text-[11px] leading-snug text-sidebar-foreground/60">
-            Sumber data: Pendataan Desa Cantik &amp; BPS Kabupaten Probolinggo.
+            Sumber data: Pemerintah Desa Jatiadi Tahun 2026.
           </p>
         ) : null}
       </SidebarFooter>
