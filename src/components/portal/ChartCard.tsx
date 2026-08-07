@@ -75,9 +75,6 @@ export function ChartCard({
               >
                 <FileText className="mr-2 size-4" /> Unduh PDF
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => void exportElementImage(bodyRef.current, name)}>
-                <ImageIcon className="mr-2 size-4" /> Unduh Gambar
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button
