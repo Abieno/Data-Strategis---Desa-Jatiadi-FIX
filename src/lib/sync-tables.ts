@@ -1,6 +1,6 @@
 /**
- * Sheet -> table mapping used by the Spreadsheet sync (Apps Script).
- * One sheet = one logical table. Header row must match these column names.
+ * table -> table mapping used by the Spreadtable sync (Apps Script).
+ * One table = one logical table. Header row must match these column names.
  */
 
 export type TableSync = {
@@ -55,6 +55,24 @@ export const SYNC_TABLES: Record<string, TableSync> = {
       "tahun",
     ],
     rtRef: true,
+  },
+  jeniskelamin: {
+    table: "jeniskelamin",
+    required: ["lakilaki", "perempuan"],
+    matchOn: ["lakilaki"],
+    numeric: ["lakilaki", "perempuan"],
+  },
+  ijazahtertinggi: {
+    table: "ijazahtertinggi",
+    required: ["tidakpunyaijazah", "sd", "smp", "sma", "ahlipratamamudamadya", "sarjana", "magister"],
+    matchOn: ["tidakpunyaijazah"],
+    numeric: ["tidakpunyaijazah", "sd", "smp", "sma", "ahlipratamamudamadya", "sarjana", "magister"],
+  },
+  aset: {
+    table: "aset",
+    required: ["mobil", "motor", "klt", "ternaksapi", "ternakkerbau", "ternakkambing", "ternakkuda"],
+    matchOn: ["mobil"],
+    numeric: ["mobil", "motor", "klt", "ternaksapi", "ternakkerbau", "ternakkambing", "ternakkuda"],
   },
   karakteristik_keluarga: {
     table: "karakteristik_keluarga",
@@ -168,19 +186,6 @@ export const SYNC_TABLES: Record<string, TableSync> = {
     required: ["tingkat_pendidikan", "tahun"],
     numeric: ["persentase", "tahun"],
   },
-  rtlh: {
-    table: "rtlh",
-    conflict: ["id_rtlh"],
-    required: ["id_rtlh", "nama_kepala_keluarga", "latitude", "longitude"],
-    numeric: [
-      "latitude",
-      "longitude",
-      "luas_bangunan_m2",
-      "jumlah_penghuni",
-      "tahun_pendataan",
-    ],
-    rtRef: true,
-  },
   metadata_indikator: {
     table: "metadata_indikator",
     conflict: ["nama_tabel", "nama_indikator"],
@@ -205,6 +210,62 @@ export const SYNC_TABLES: Record<string, TableSync> = {
     required: ["kode_layer", "nama_layer", "tabel_sumber"],
     numeric: ["urutan"],
   },
+  
+  rtlh_maps: {
+    table: "rtlh_maps",
+    conflict: ["foto_url"],
+    required: ["foto_url", "latkoordinat", "longkoordinat"],
+    numeric: ["latkoordinat", "longkoordinat"],
+  },
+
+  atap: {
+    table: "atap",
+    required: ["rt"],
+    numeric: ["genteng", "seng", "asbes"],
+    conflict: ["rt"],
+  },
+
+  dinding: {
+    table: "dinding",
+    required: ["rt"],
+    numeric: ["tembok", "pa", "kaggc", "ab", "bambu"],
+    conflict: ["rt"],
+  },
+
+  lantai: {
+    table: "lantai",
+    required: ["rt"],
+    numeric: ["mg", "keramik", "utt", "sb", "tanah"],
+    conflict: ["rt"],
+  },
+
+  fasilitasbab: {
+    table: "fasilitasbab",
+    required: ["rt"],
+    numeric: ["adas", "adab", "tidakada"],
+    conflict: ["rt"],
+  },
+
+  airminum: {
+    table: "airminum",
+    required: ["rt"],
+    numeric: ["akb", "aiu", "sbp", "st", "lainnya"],
+    conflict: ["rt"],
+  },
+
+  pendidikan: {
+    table: "pendidikan",
+    required: ["tk", "ra", "sd", "mi", "smp", "mts", "sma", "ma", "smk", "apt"],
+    matchOn: ["tk"],
+    numeric: ["tk", "ra", "sd", "mi", "smp", "mts", "sma", "ma", "smk", "apt"],
+  },
+
+  kesehatan: {
+    table: "kesehatan",
+    required: ["rs", "puskesmas", "pd", "pb", "polindes", "apotek", "posyandu", "posbindu"],
+    matchOn: ["rs"],
+    numeric: ["rs", "puskesmas", "pd", "pb", "polindes", "apotek", "posyandu", "posbindu"],
+  },
 };
 
 export type SyncRow = Record<string, unknown>;
@@ -214,7 +275,7 @@ function isEmpty(value: unknown): boolean {
 }
 
 /**
- * Validates and normalises one spreadsheet row against its table config.
+ * Validates and normalises one spreadtable row against its table config.
  * Returns the cleaned payload, or an error message when the row must be skipped.
  */
 export function normalizeRow(
