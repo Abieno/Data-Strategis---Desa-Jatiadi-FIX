@@ -12,4 +12,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // MapLibre ships its own web worker; pre-bundling it breaks the worker URL,
+    // which silently disables every GeoJSON layer (boundary + RTLH points).
+    optimizeDeps: { exclude: ["maplibre-gl"] },
+  },
 });
