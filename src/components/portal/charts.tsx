@@ -129,7 +129,7 @@ export function BarsChartsolo({
         {/* Tooltip */}
         <Tooltip
           formatter={(value: number, _name, props) => [
-            `${value} jiwa (${props.payload.percentage}%)`,
+            `${value}  (${props.payload.percentage}%)`,
             
           ]}
         />
@@ -190,7 +190,7 @@ export function BarsChartsolobawah({
           {/* Tooltip */}
           <Tooltip
             formatter={(value: number, _name, props) => [
-              `${value} jiwa (${props.payload.percentage}%)`,
+              `${value}  (${props.payload.percentage}%)`,
             ]}
           />
 
@@ -264,7 +264,7 @@ export function DonutChart({
             const p = props.payload;
 
             return [
-              `${value} jiwa (${p.percentage}%)`,
+              `${value}  (${p.percentage}%)`,
               p.name,
             ];
           }}
