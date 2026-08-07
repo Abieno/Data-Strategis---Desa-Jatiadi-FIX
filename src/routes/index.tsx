@@ -1,26 +1,33 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Users, Home as HomeIcon, Store, HeartHandshake, ArrowRight, MapPin } from "lucide-react";
+import {
+  Users,
+  Home as HomeIcon,
+  Store,
+  HeartHandshake,
+  ArrowRight,
+  MapPin,
+} from "lucide-react";
 
 import { PageShell } from "@/components/portal/PageShell";
 import { StatCard } from "@/components/portal/StatCard";
 import { ChartCard } from "@/components/portal/ChartCard";
 import { BarsChart, DonutChart } from "@/components/portal/charts";
-import { useRows, useRtRows, sum } from "@/lib/data";
+import { useRows, sum } from "@/lib/data";
 import { allNavItems } from "@/lib/nav";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Portal Data Strategis Desa Jatiadi | Desa Cantik" },
+      { title: "Sistem Informasi Data Strategis - Desa Jatiadi" },
       {
         name: "description",
         content:
-          "Portal satu data Desa Jatiadi: kependudukan, keluarga, pendidikan, kesehatan, UMKM, dan peta tematik RTLH dalam satu dasbor interaktif.",
+          "Sistem Informasi yang berisi data-data Desa Jatiadi: kependudukan, tempat tinggal, fasilitas sosial, peta, dan lain-lain.",
       },
-      { property: "og:title", content: "Portal Data Strategis Desa Jatiadi" },
+      { property: "og:title", content: "Sistem Informasi Data Strategis - Desa Jatiadi" },
       {
         property: "og:description",
-        content: "Dasbor statistik desa: penduduk, keluarga, UMKM, dan peta tematik RTLH Desa Jatiadi.",
+        content: "Sistem Informasi yang berisi data-data Desa Jatiadi: kependudukan, tempat tinggal, fasilitas sosial, peta, dan lain-lain.",
       },
     ],
   }),
@@ -37,106 +44,143 @@ type Profil = {
   tahun_data: number | null;
 };
 
-type Kependudukan = {
-  laki_laki: number;
+type AtapRow = {
+  rt: string;
+  genteng: number;
+  seng: number;
+  asbes: number;
+};
+
+type JenisKelaminRow = {
+  lakilaki: number;
   perempuan: number;
-  total: number;
-  islam: number;
-  protestan: number;
-  katolik: number;
-  hindu: number;
-  budha: number;
-  lainnya: number;
 };
 
 function Beranda() {
-  const { data: profil } = useRows<Profil>("desa_profil", { limit: 1 });
-  const { rows: penduduk, isLoading } = useRtRows<Kependudukan>("kependudukan_per_rt", null);
-  const { rows: keluarga } = useRtRows<{ jumlah_kk: number }>("karakteristik_keluarga", null);
-  const { rows: umkm } = useRtRows<{ jumlah_umkm: number }>("umkm_per_rt", null);
-  const { data: rtlh } = useRows<{ id: string }>("rtlh", { select: "id" });
+    const { data: profil } = useRows("desa_profil", { limit: 1 });
+    
+    const {
+      data: atapData,
+      isLoading: isLoadingAtap,
+    } = useRows<AtapRow>("atap");
 
-  const p = profil?.[0];
-  const totalPenduduk = sum(penduduk, "total");
-  const laki = sum(penduduk, "laki_laki");
-  const perempuan = sum(penduduk, "perempuan");
+    const {
+      data: jenisKelaminData,
+      isLoading: isLoadingJenisKelamin,
+    } = useRows<JenisKelaminRow>("jeniskelamin");
 
-  const perRt = penduduk.map((r) => ({
-    name: `RT ${r.rt_label}`,
-    "Laki-laki": r.laki_laki,
-    Perempuan: r.perempuan,
-  }));
+    const atapRows = atapData ?? [];
+    const jenisKelaminRows = jenisKelaminData ?? [];
 
-  const agama = [
-    { name: "Islam", value: sum(penduduk, "islam") },
-    { name: "Protestan", value: sum(penduduk, "protestan") },
-    { name: "Katolik", value: sum(penduduk, "katolik") },
-    { name: "Hindu", value: sum(penduduk, "hindu") },
-    { name: "Budha", value: sum(penduduk, "budha") },
-    { name: "Lainnya", value: sum(penduduk, "lainnya") },
-  ].filter((a) => a.value > 0);
+    const p = profil?.[0];
 
-  return (
+    // ==========================================
+    // DATA ATAP
+    // ==========================================
+
+    const genteng = sum(atapRows, "genteng");
+    const seng = sum(atapRows, "seng");
+    const asbes = sum(atapRows, "asbes");
+
+    // Total rumah = seluruh jenis atap
+    const totalRumah = genteng + seng + asbes ;
+
+    // Jumlah RT = jumlah baris RT pada tabel atap
+    const totalRT = atapRows.length;
+
+    // ==========================================
+    // DATA JENIS KELAMIN
+    // ==========================================
+
+    const laki = sum(jenisKelaminRows, "lakilaki");
+    const perempuan = sum(jenisKelaminRows, "perempuan");
+
+    // Total penduduk
+    const totalPenduduk = laki + perempuan;
+
+    // ==========================================
+    // DATA GRAFIK
+    // ==========================================
+
+    const perRt = atapRows.map((r) => ({
+      name: `RT ${r.rt}`,
+      Genteng: r.genteng,
+      Seng: r.seng,
+      Asbes: r.asbes,
+    }));
+
+    const agama: { name: string; value: number }[] = [];
+
+    return (
     <PageShell
-      title={`Selamat datang di Portal Data Desa ${p?.nama_desa ?? "Jatiadi"}`}
-      description="Satu pintu data strategis desa — statistik sosial, ekonomi, dan spasial yang diperbarui berkala melalui sinkronisasi spreadsheet."
+      title={`Selamat Datang di Portal Data Strategis - Desa Jatiadi`}
+      description="Sistem Informasi data strategis desa — diperbarui secara real-time di spreadsheet."
     >
-      {p ? (
-        <div className="surface-card flex flex-wrap items-center gap-x-6 gap-y-2 p-4 text-sm">
-          <span className="flex items-center gap-2 font-medium">
-            <MapPin className="size-4 text-primary" aria-hidden />
-            Kec. {p.kecamatan}, {p.kabupaten}, {p.provinsi}
-          </span>
-          <span className="text-muted-foreground">Luas wilayah: {p.luas_wilayah_ha ?? "-"} Ha</span>
-          <span className="text-muted-foreground">Ketinggian: {p.tinggi_wilayah_mdpl ?? "-"} mdpl</span>
-          <span className="text-muted-foreground">Tahun data: {p.tahun_data ?? "-"}</span>
-        </div>
-      ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Penduduk" value={totalPenduduk} icon={Users} loading={isLoading} hint={`${laki} laki-laki · ${perempuan} perempuan`} />
-        <StatCard label="Jumlah Keluarga" value={sum(keluarga, "jumlah_kk")} icon={HeartHandshake} tone="info" />
-        <StatCard label="Jumlah UMKM" value={sum(umkm, "jumlah_umkm")} icon={Store} tone="success" />
-        <StatCard label="Rumah Tidak Layak Huni" value={rtlh?.length ?? 0} icon={HomeIcon} tone="warning" />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <StatCard
+          label="Jumlah RT"
+          value={totalRT}
+          icon={Users}
+          loading={isLoadingAtap}
+          hint="Jumlah RT berdasarkan data atap"
+        />
+
+        <StatCard
+          label="Jumlah Penduduk"
+          value={totalPenduduk}
+          icon={HeartHandshake}
+          tone="info"
+          loading={isLoadingJenisKelamin}
+          hint={`${laki} laki-laki · ${perempuan} perempuan`}
+        />
+
+        <StatCard
+          label="Jumlah Rumah"
+          value={totalRumah}
+          icon={HomeIcon}
+          tone="success"
+          loading={isLoadingAtap}
+          hint={`${genteng} genteng · ${seng} seng · ${asbes} asbes`}
+        />
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-3">
-        <ChartCard
-          className="xl:col-span-2"
-          title="Penduduk per RT menurut Jenis Kelamin"
-          description="Distribusi penduduk laki-laki dan perempuan di seluruh RT."
-          metadataTable="kependudukan_per_rt"
-          rows={perRt}
-          columns={[
-            { key: "name", label: "RT" },
-            { key: "Laki-laki", label: "Laki-laki" },
-            { key: "Perempuan", label: "Perempuan" },
-          ]}
-          fileName="Penduduk per RT"
-        >
-          <BarsChart
-            data={perRt}
-            xKey="name"
-            stacked
-            series={[
-              { key: "Laki-laki", label: "Laki-laki", color: "var(--male)" },
-              { key: "Perempuan", label: "Perempuan", color: "var(--female)" },
-            ]}
-          />
-        </ChartCard>
+      <div className="surface-card p-5">
+        <h2 className="mb-3 font-display text-base font-semibold">
+          Identitas Wilayah
+        </h2>
 
-        <ChartCard
-          title="Komposisi Pemeluk Agama"
-          description="Jumlah penduduk menurut agama yang dianut."
-          rows={agama}
-          columns={[
-            { key: "name", label: "Agama" },
-            { key: "value", label: "Jumlah" },
-          ]}
-          fileName="Pemeluk Agama"
-        >
-          <DonutChart data={agama} />
-        </ChartCard>
+        <div className="divide-y">
+          <div className="grid grid-cols-[180px_1fr] gap-4 py-3 text-sm">
+            <span className="font-medium">Nama Desa</span>
+            <span>Jatiadi</span>
+          </div>
+
+          <div className="grid grid-cols-[180px_1fr] gap-4 py-3 text-sm">
+            <span className="font-medium">Kecamatan</span>
+            <span>Gending</span>
+          </div>
+
+          <div className="grid grid-cols-[180px_1fr] gap-4 py-3 text-sm">
+            <span className="font-medium">Kabupaten</span>
+            <span>Probolinggo</span>
+          </div>
+
+          <div className="grid grid-cols-[180px_1fr] gap-4 py-3 text-sm">
+            <span className="font-medium">Provinsi</span>
+            <span>Jawa Timur</span>
+          </div>
+
+          <div className="grid grid-cols-[180px_1fr] gap-4 py-3 text-sm">
+            <span className="font-medium">Luas Wilayah</span>
+            <span>229 Ha</span>
+          </div>
+
+          <div className="grid grid-cols-[180px_1fr] gap-4 py-3 text-sm">
+            <span className="font-medium">Tahun Data</span>
+            <span>2026</span>
+          </div>
+        </div>
       </div>
 
       <section>
