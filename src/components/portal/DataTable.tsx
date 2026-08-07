@@ -2,7 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils";
 import { nf } from "@/lib/format";
 
-export type Column = { key: string; label: string; align?: "left" | "right"; format?: "number" | "text" };
+export type Column = { key: string; label: string; align?: "left" | "center" | "right"; format?: "number" | "text" };
 
 type Props = {
   columns: Column[];
@@ -26,7 +26,7 @@ export function DataTable({ columns, rows, loading, emptyText = "Belum ada data.
         <TableHeader>
           <TableRow className="bg-muted/60">
             {columns.map((c) => (
-              <TableHead key={c.key} className={cn("whitespace-nowrap text-xs font-semibold", c.align === "right" && "text-right")}>
+              <TableHead key={c.key} className={cn("whitespace-nowrap text-xs font-semibold", c.align === "right" && "text-right", c.align === "center" && "text-center")}>
                 {c.label}
               </TableHead>
             ))}
@@ -55,7 +55,7 @@ export function DataTable({ columns, rows, loading, emptyText = "Belum ada data.
                 {columns.map((c) => (
                   <TableCell
                     key={c.key}
-                    className={cn("whitespace-nowrap text-sm", c.align === "right" && "text-right tabular-nums")}
+                    className={cn("whitespace-nowrap text-sm", c.align === "right" && "text-right tabular-nums", c.align === "center" && "text-center")}
                   >
                     {render(c, row)}
                   </TableCell>
@@ -66,7 +66,7 @@ export function DataTable({ columns, rows, loading, emptyText = "Belum ada data.
           {footerRow && rows.length > 0 ? (
             <TableRow className="bg-primary-soft/70 font-semibold">
               {columns.map((c) => (
-                <TableCell key={c.key} className={cn("text-sm", c.align === "right" && "text-right tabular-nums")}>
+                <TableCell key={c.key} className={cn("text-sm", c.align === "right" && "text-right tabular-nums",  c.align === "center" && "text-center")}>
                   {render(c, footerRow)}
                 </TableCell>
               ))}
