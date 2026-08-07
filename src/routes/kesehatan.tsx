@@ -1,6 +1,19 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Stethoscope, Hospital, Syringe, UserPlus } from "lucide-react";
+import { 
+  Baby,
+  BookOpen,
+  School,
+  University,
+  Hospital,
+  Stethoscope,
+  UserRound,
+  HeartPulse,
+  HouseHeart,
+  Pill,
+  HeartHandshake,
+  Activity,
+ } from "lucide-react"
 
 import { PageShell } from "@/components/portal/PageShell";
 import { StatCard } from "@/components/portal/StatCard";
@@ -13,106 +26,126 @@ import { useRows, useYears, sum } from "@/lib/data";
 export const Route = createFileRoute("/kesehatan")({
   head: () => ({
     meta: [
-      { title: "Kesehatan Desa Jatiadi — Fasilitas & Tenaga Kesehatan" },
+      { title: "Kesehatan yang Diakses Desa Jatiadi - Sekolah dan Perguruan Tinggi" },
       {
         name: "description",
-        content: "Data kesehatan Desa Jatiadi: jumlah fasilitas kesehatan seperti posyandu dan poskesdes serta tenaga kesehatan yang tersedia.",
+        content: "Kesehatan yang Diakses di Desa Jatiadi.",
       },
-      { property: "og:title", content: "Kesehatan Desa Jatiadi" },
-      { property: "og:description", content: "Fasilitas dan tenaga kesehatan yang tersedia di Desa Jatiadi." },
+      { propersy: "og:title", content: "Kesehatan yang Diakses Desa Jatiadi" },
+      { propersy: "og:description", content: "puskeposyandusngkuposbindun Kesehatan yang Diakses di Desa Jatiadi" },
     ],
   }),
-  component: Kesehatan,
+  component: kesehatan,
 });
 
-type Fasilitas = { jenis_fasilitas: string; jumlah: number };
-type Tenaga = { jenis_tenaga: string; jumlah: number };
+type Row = { rs: number; puskesmas: number; pd: number; pb: number; polindes: number; apotek: number; posyandu: number; posbindu: number };
 
-function Kesehatan() {
-  const { data: years } = useYears("kesehatan_fasilitas");
-  const [year, setYear] = useState<number | null>(null);
-  const activeYear = year ?? years?.[0] ?? null;
-  const { data: fasilitas, isLoading } = useRows<Fasilitas>("kesehatan_fasilitas", { year: activeYear, order: "jenis_fasilitas" });
-  const { data: tenaga } = useRows<Tenaga>("kesehatan_tenaga", { year: activeYear, order: "jenis_tenaga" });
+function kesehatan() {
+  const { data, isLoading } = useRows<Row>("kesehatan");
+  const rows = data ?? [];
 
-  const fRows = fasilitas ?? [];
-  const tRows = tenaga ?? [];
-  const totalF = sum(fRows, "jumlah");
-  const totalT = sum(tRows, "jumlah");
+  const rs = sum(rows, "rs");
+  const puskesmas = sum(rows, "puskesmas");
+  const pd = sum(rows, "pd");
+  const pb = sum(rows, "pb");
+  const polindes = sum(rows, "polindes");
+  const apotek = sum(rows, "apotek");
+  const posyandu = sum(rows, "posyandu");
+  const posbindu = sum(rows, "posbindu");
+  const total = rs + puskesmas + pd + pb + polindes + apotek + posyandu + posbindu;
+  const kesehatan = [
+    {
+      name: "Rumah Sakit",
+      value: rs,
+      percentage: ((rs / total) * 100).toFixed(1),
+    },
+    {
+      name: "Puskesmas",
+      value: puskesmas,
+      percentage: ((puskesmas / total) * 100).toFixed(1),
+    },
+    {
+      name: "Praktek Doter",
+      value: pd,
+      percentage: ((pd / total) * 100).toFixed(1),
+    },
+    {
+      name: "Prakter Bidan",
+      value: pb,
+      percentage: ((pb / total) * 100).toFixed(1),
+    },
+    {
+      name: "Pondok Bersalin Desa",
+      value: polindes,
+      percentage: ((polindes / total) * 100).toFixed(1),
+    },
+    {
+      name: "Apotek",
+      value: apotek,
+      percentage: ((apotek / total) * 100).toFixed(1),
+    },
+    {
+      name: "Posyandu",
+      value: posyandu,
+      percentage: ((posyandu / total) * 100).toFixed(1),
+    },
+    {
+      name: "Pos Pembinaan Terpadu",
+      value: posbindu,
+      percentage: ((posbindu / total) * 100).toFixed(1),
+    },
+  ];
 
-  const fChart = fRows.map((r) => ({ name: r.jenis_fasilitas, Jumlah: r.jumlah }));
-  const tChart = tRows.map((r) => ({ name: r.jenis_tenaga, value: r.jumlah })).filter((r) => r.value > 0);
+  const columns = [
+    { key: "rs", label: "Rumah Sakit" , align: "center" as const},
+    { key: "puskesmas", label: "Puskesmas", align: "center" as const },
+    { key: "pd", label: "Praktek Doter", align: "center" as const },
+    { key: "pb", label: "Prakter Bidan", align: "center" as const },
+    { key: "polindes", label: "Pondok Bersalin Desa", align: "center" as const },
+    { key: "apotek", label: "Apotek", align: "center" as const },
+    { key: "posyandu", label: "Posyandu", align: "center" as const },
+    { key: "posbindu", label: "Pos Pembinaan Terpadu", align: "center" as const },
+  ];
 
   return (
     <PageShell
-      breadcrumb="Kesehatan"
-      title="Kesehatan"
-      description="Ketersediaan fasilitas dan tenaga kesehatan di Desa Jatiadi."
-      actions={<YearFilter years={years ?? []} value={activeYear} onChange={setYear} />}
+      breadcrumb="Kesehatan yang Diakses"
+      title="Kesehatan yang Diakses"
+      description="Rekapan Kesehatan yang Diakses di Desa Jatiadi"
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Fasilitas Kesehatan" value={totalF} icon={Hospital} loading={isLoading} />
-        <StatCard label="Total Tenaga Kesehatan" value={totalT} icon={Stethoscope} tone="info" />
-        <StatCard label="Jenis Fasilitas" value={fRows.length} icon={Syringe} tone="success" />
-        <StatCard label="Jenis Tenaga" value={tRows.length} icon={UserPlus} tone="warning" />
+        <StatCard label="Rumah Sakit" value={rs} icon={Hospital} tone="info" loading={isLoading} />
+        <StatCard label="Puskesmas" value={puskesmas} icon={HeartPulse} tone="success" loading={isLoading} />
+        <StatCard label="Praktek Dokter" value={pd} icon={Stethoscope} tone="warning" loading={isLoading} />
+        <StatCard label="Praktek Bidan" value={pb} icon={HouseHeart} tone="success" loading={isLoading} />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Pondok Bersalin Desa" value={polindes} icon={Baby} tone="info" loading={isLoading} />
+        <StatCard label="Apotek" value={apotek} icon={Pill} tone="success" loading={isLoading} />
+        <StatCard label="Posyandu" value={posyandu} icon={HeartHandshake} tone="warning"  />
+        <StatCard label="Pos Pembinaan Terpadu" value={posbindu} icon={Activity} tone="info" loading={isLoading} />
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-2">
-        <ChartCard
-          title="Fasilitas Kesehatan"
-          metadataTable="kesehatan_fasilitas"
-          rows={fChart}
-          columns={[{ key: "name", label: "Jenis Fasilitas" }, { key: "Jumlah", label: "Jumlah" }]}
-          fileName="Fasilitas Kesehatan"
-        >
-          <BarsChart data={fChart} xKey="name" horizontal height={340} series={[{ key: "Jumlah", label: "Jumlah" }]} />
-        </ChartCard>
+       <ChartCard
+        title="Komposisi Kesehatan yang Diakses"
+        columns={[
+          { key: "name", label: "Kesehatan yang Diakses" },
+          { key: "value", label: "Jumlah" },
+          { key: "percentage", label: "Persentase" },
+        ]}
+        rows={kesehatan}
+        fileName="Kesehatan yang Diakses Desa Jatiadi"
+      >
+        <DonutChart data={kesehatan} />
+      </ChartCard>
 
-        <ChartCard
-          title="Tenaga Kesehatan"
-          metadataTable="kesehatan_tenaga"
-          rows={tChart}
-          columns={[{ key: "name", label: "Jenis Tenaga" }, { key: "value", label: "Jumlah" }]}
-          fileName="Tenaga Kesehatan"
-        >
-          <DonutChart data={tChart} height={340} />
-        </ChartCard>
-      </div>
-
-      <div className="grid gap-5 xl:grid-cols-2">
-        <ChartCard
-          title="Tabel Fasilitas Kesehatan"
-          rows={fRows as unknown as Record<string, unknown>[]}
-          columns={[{ key: "jenis_fasilitas", label: "Jenis Fasilitas" }, { key: "jumlah", label: "Jumlah" }]}
-          fileName="Tabel Fasilitas Kesehatan"
-        >
-          <DataTable
-            columns={[
-              { key: "jenis_fasilitas", label: "Jenis Fasilitas" },
-              { key: "jumlah", label: "Jumlah", align: "right" },
-            ]}
-            rows={fRows as unknown as Record<string, unknown>[]}
-            loading={isLoading}
-            footerRow={{ jenis_fasilitas: "Total", jumlah: totalF }}
-          />
-        </ChartCard>
-
-        <ChartCard
-          title="Tabel Tenaga Kesehatan"
-          rows={tRows as unknown as Record<string, unknown>[]}
-          columns={[{ key: "jenis_tenaga", label: "Jenis Tenaga" }, { key: "jumlah", label: "Jumlah" }]}
-          fileName="Tabel Tenaga Kesehatan"
-        >
-          <DataTable
-            columns={[
-              { key: "jenis_tenaga", label: "Jenis Tenaga" },
-              { key: "jumlah", label: "Jumlah", align: "right" },
-            ]}
-            rows={tRows as unknown as Record<string, unknown>[]}
-            footerRow={{ jenis_tenaga: "Total", jumlah: totalT }}
-          />
-        </ChartCard>
-      </div>
+      <ChartCard title="Tabel Atap Bangunan" rows={rows as unknown as Record<string, unknown>[]} columns={columns} fileName="Atap Bangunan Desa Jatiadi">
+        <DataTable
+          columns={columns}
+          rows={rows as unknown as Record<string, unknown>[]}
+          loading={isLoading}
+        />
+      </ChartCard>
     </PageShell>
   );
 }

@@ -1,94 +1,132 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { School, Users, GraduationCap, BookOpen } from "lucide-react";
+import { 
+  Baby,
+  BookOpen,
+  School,
+  GraduationCap,
+  University,
+ } from "lucide-react"
 
 import { PageShell } from "@/components/portal/PageShell";
 import { StatCard } from "@/components/portal/StatCard";
 import { ChartCard } from "@/components/portal/ChartCard";
 import { DataTable } from "@/components/portal/DataTable";
 import { YearFilter } from "@/components/portal/YearFilter";
-import { BarsChart } from "@/components/portal/charts";
+import { BarsChart, DonutChart } from "@/components/portal/charts";
 import { useRows, useYears, sum } from "@/lib/data";
 
 export const Route = createFileRoute("/pendidikan")({
   head: () => ({
     meta: [
-      { title: "Pendidikan Desa Jatiadi — Sekolah, Guru & Murid" },
+      { title: "Pendidikan yang Diakses Desa Jatiadi - Sekolah dan Perguruan Tinggi" },
       {
         name: "description",
-        content: "Data fasilitas pendidikan Desa Jatiadi: jumlah sekolah, guru, dan murid menurut jenjang pendidikan.",
+        content: "Pendidikan yang Diakses di Desa Jatiadi.",
       },
-      { property: "og:title", content: "Pendidikan Desa Jatiadi" },
-      { property: "og:description", content: "Jumlah sekolah, guru, dan murid menurut jenjang di Desa Jatiadi." },
+      { propetky: "og:title", content: "Pendidikan yang Diakses Desa Jatiadi" },
+      { propetky: "og:description", content: "Rangkuman Pendidikan yang Diakses di Desa Jatiadi" },
     ],
   }),
-  component: Pendidikan,
+  component: pendidikan,
 });
 
-type Row = { jenjang: string; jumlah_sekolah: number; jumlah_guru: number; jumlah_murid: number };
+type Row = { tk: number; ra: number; sd: number; mi: number; smp: number; mts: number; sma: number; ma: number; smk: number; apt: number };
 
-function Pendidikan() {
-  const { data: years } = useYears("pendidikan_sekolah");
-  const [year, setYear] = useState<number | null>(null);
-  const activeYear = year ?? years?.[0] ?? null;
-  const { data, isLoading } = useRows<Row>("pendidikan_sekolah", { year: activeYear, order: "jenjang" });
+function pendidikan() {
+  const { data, isLoading } = useRows<Row>("pendidikan");
   const rows = data ?? [];
 
-  const sekolah = sum(rows, "jumlah_sekolah");
-  const guru = sum(rows, "jumlah_guru");
-  const murid = sum(rows, "jumlah_murid");
-  const rasio = guru ? Math.round(murid / guru) : 0;
-
-  const columns = [
-    { key: "jenjang", label: "Jenjang" },
-    { key: "jumlah_sekolah", label: "Sekolah", align: "right" as const },
-    { key: "jumlah_guru", label: "Guru", align: "right" as const },
-    { key: "jumlah_murid", label: "Murid", align: "right" as const },
+  const tk = sum(rows, "tk");
+  const ra = sum(rows, "ra");
+  const sd = sum(rows, "sd");
+  const mi = sum(rows, "mi");
+  const smp = sum(rows, "smp");
+  const mts = sum(rows, "mts");
+  const sma = sum(rows, "sma");
+  const ma = sum(rows, "ma");
+  const smk = sum(rows, "smk");
+  const apt = sum(rows, "apt");
+  const tkra = tk + ra;
+  const sdmi = sd + mi;
+  const smpmts = smp + mts;
+  const smamasmk = sma + ma + smk;
+  const total = tk + ra + sd + mi + smp + mts + sma + ma + smk + apt;
+  const pendidikan = [
+    {
+      name: "TK/Sederajat",
+      value: tkra,
+      percentage: ((tkra / total) * 100).toFixed(1),
+    },
+    {
+      name: "SD/Sederajat",
+      value: sdmi,
+      percentage: ((sdmi / total) * 100).toFixed(1),
+    },
+    {
+      name: "SMP/Sederajat",
+      value: smpmts,
+      percentage: ((smpmts / total) * 100).toFixed(1),
+    },
+    {
+      name: "SMA/Sederajat",
+      value: smamasmk,
+      percentage: ((smamasmk / total) * 100).toFixed(1),
+    },
+    {
+      name: "Akademi/Perguruan Tinggi",
+      value: apt,
+      percentage: ((apt / total) * 100).toFixed(1),
+    },
   ];
 
-  const chart = rows.map((r) => ({ name: r.jenjang, Sekolah: r.jumlah_sekolah, Guru: r.jumlah_guru, Murid: r.jumlah_murid }));
+  const columns = [
+    { key: "tk", label: "TK" , align: "center" as const},
+    { key: "ra", label: "RA", align: "center" as const },
+    { key: "sd", label: "SD", align: "center" as const },
+    { key: "mi", label: "MI", align: "center" as const },
+    { key: "smp", label: "SMP", align: "center" as const },
+    { key: "mts", label: "MTS", align: "center" as const },
+    { key: "sma", label: "SMA", align: "center" as const },
+    { key: "ma", label: "MA", align: "center" as const },
+    { key: "smk", label: "SMK", align: "center" as const },
+    { key: "apt", label: "Akademi/Perguruan Tinggi", align: "center" as const },
+  ];
 
   return (
     <PageShell
-      breadcrumb="Pendidikan"
-      title="Pendidikan"
-      description="Ketersediaan sekolah, guru, dan murid menurut jenjang pendidikan di Desa Jatiadi."
-      actions={<YearFilter years={years ?? []} value={activeYear} onChange={setYear} />}
+      breadcrumb="Pendidikan yang Diakses"
+      title="Pendidikan yang Diakses"
+      description="Rekapan Pendidikan yang Diakses di Desa Jatiadi"
     >
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Jumlah Sekolah" value={sekolah} icon={School} loading={isLoading} />
-        <StatCard label="Jumlah Guru" value={guru} icon={Users} tone="info" loading={isLoading} />
-        <StatCard label="Jumlah Murid" value={murid} icon={GraduationCap} tone="success" loading={isLoading} />
-        <StatCard label="Rasio Murid per Guru" value={rasio} icon={BookOpen} tone="warning" hint="Murid per satu guru" />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
+        <StatCard label="RA/Sederajat" value={tkra} icon={Baby} tone="info" loading={isLoading} />
+        <StatCard label="SD/Sederajat" value={sdmi} icon={BookOpen} tone="success" loading={isLoading} />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <StatCard label="SMP/Sederajat" value={smpmts} icon={School} tone="warning" loading={isLoading} />
+        <StatCard label="SMA/Sederajat" value={smamasmk} icon={GraduationCap} tone="info" loading={isLoading} />
+        <StatCard label="Akademi/Perguruan Tinggi" value={apt} icon={University} tone="success"  />
       </div>
 
-      <ChartCard
-        title="Guru dan Murid menurut Jenjang"
-        metadataTable="pendidikan_sekolah"
-        rows={chart}
+       <ChartCard
+        title="Komposisi Pendidikan yang Diakses"
         columns={[
-          { key: "name", label: "Jenjang" },
-          { key: "Guru", label: "Guru" },
-          { key: "Murid", label: "Murid" },
+          { key: "name", label: "Pendidikan yang Diakses" },
+          { key: "value", label: "Jumlah" },
+          { key: "percentage", label: "Persentase" },
         ]}
-        fileName="Guru dan Murid per Jenjang"
+        rows={pendidikan}
+        fileName="Pendidikan yang Diakses Desa Jatiadi"
       >
-        <BarsChart
-          data={chart}
-          xKey="name"
-          series={[
-            { key: "Guru", label: "Guru" },
-            { key: "Murid", label: "Murid" },
-          ]}
-        />
+        <DonutChart data={pendidikan} />
       </ChartCard>
 
-      <ChartCard title="Tabel Fasilitas Pendidikan" rows={rows as unknown as Record<string, unknown>[]} columns={columns} fileName="Fasilitas Pendidikan">
+      <ChartCard title="Tabel Atap Bangunan" rows={rows as unknown as Record<string, unknown>[]} columns={columns} fileName="Atap Bangunan Desa Jatiadi">
         <DataTable
           columns={columns}
           rows={rows as unknown as Record<string, unknown>[]}
           loading={isLoading}
-          footerRow={{ jenjang: "Total", jumlah_sekolah: sekolah, jumlah_guru: guru, jumlah_murid: murid }}
         />
       </ChartCard>
     </PageShell>
