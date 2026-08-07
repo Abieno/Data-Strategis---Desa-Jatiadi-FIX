@@ -96,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "https://res.cloudinary.com/dfivdsuba/image/upload/v1786144984/logo_pemkab_jzhynq.svg", type: "image/x-icon" },
     ],
   }),
 
@@ -133,10 +133,10 @@ function RootComponent() {
               <SidebarTrigger aria-label="Buka atau tutup menu" />
               <div className="min-w-0">
                 <p className="truncate font-display text-sm font-semibold sm:text-base">
-                  Portal Data Strategis Desa Jatiadi
+                  Sistem Informasi Data Strategis Desa Jatiadi
                 </p>
                 <p className="hidden truncate text-xs text-muted-foreground sm:block">
-                  Kecamatan Gending, Kabupaten Probolinggo — Program Desa Cantik
+                  Kecamatan Gending, Kabupaten Probolinggo, Jawa Timur
                 </p>
               </div>
             </header>
@@ -145,7 +145,7 @@ function RootComponent() {
               <Outlet />
             </main>
             <footer className="border-t px-4 py-6 text-center text-xs text-muted-foreground sm:px-6">
-              © {new Date().getFullYear()} Pemerintah Desa Jatiadi · Data bersifat read-only dan diperbarui melalui sinkronisasi spreadsheet.
+              Pemerintah Desa Jatiadi · Data bersifat read-only dan diperbarui melalui sinkronisasi spreadsheet.
             </footer>
           </div>
         </div>
