@@ -12,6 +12,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  LabelList,
 } from "recharts";
 import { nf } from "@/lib/format";
 
@@ -73,17 +74,168 @@ export function BarsChart({
         {series.length > 1 ? <Legend wrapperStyle={{ fontSize: 12 }} /> : null}
         {series.map((s, i) => (
           <Bar
-            key={s.key}
-            dataKey={s.key}
-            name={s.label}
-            {...(stacked ? { stackId: "a" } : {})}
-            fill={s.color ?? CHART_COLORS[i % CHART_COLORS.length]}
-            radius={horizontal ? [0, 6, 6, 0] : [6, 6, 0, 0]}
-            maxBarSize={46}
-          />
+            dataKey="value"
+            fill="#ea802a"
+            radius={[0, 6, 6, 0]}
+            isAnimationActive={true}
+            animationBegin={0}
+            animationDuration={1200}
+            animationEasing="ease-out"
+          >
+            <LabelList
+              dataKey="value"
+              position="right"
+            />
+          </Bar>
         ))}
       </BarChart>
     </ResponsiveContainer>
+  );
+}
+
+export function BarsChartsolo({
+  data,
+  xKey,
+  height = 340,
+}: {
+  data: Datum[];
+  xKey: string;
+  height?: number;
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <BarChart
+        data={data}
+        layout="vertical"
+        margin={{
+          top: 10,
+          right: 50,
+          left: 20,
+          bottom: 10,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+
+        {/* Nilai */}
+        <XAxis type="number" hide />
+
+        {/* Nama kategori */}
+        <YAxis
+          type="category"
+          dataKey={xKey}
+          hide
+        />
+
+        {/* Tooltip */}
+        <Tooltip
+          formatter={(value: number, _name, props) => [
+            `${value} jiwa (${props.payload.percentage}%)`,
+            
+          ]}
+        />
+
+        <Bar
+          dataKey="value"
+          radius={[0, 8, 8, 0]}
+          animationDuration={900}
+          animationEasing="ease-out"
+        >
+          {data.map((_, index) => (
+            <Cell
+              key={index}
+              fill={CHART_COLORS[index % CHART_COLORS.length]}
+            />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+export function BarsChartsolobawah({
+  data,
+  xKey,
+  height = 340,
+}: {
+  data: Datum[];
+  xKey: string;
+  height?: number;
+}) {
+  return (
+    <div className="w-full">
+      <ResponsiveContainer width="100%" height={height}>
+        <BarChart
+          data={data}
+          layout="horizontal"
+          margin={{
+            top: 10,
+            right: 30,
+            left: 20,
+            bottom: 10,
+          }}
+        >
+          {/* Nilai */}
+          <YAxis
+            type="number"
+            hide
+          />
+
+          {/* Nama kategori */}
+          <XAxis
+            type="category"
+            dataKey={xKey}
+            hide
+          />
+
+          {/* Tooltip */}
+          <Tooltip
+            formatter={(value: number, _name, props) => [
+              `${value} jiwa (${props.payload.percentage}%)`,
+            ]}
+          />
+
+          <Bar
+            dataKey="value"
+            radius={[8, 8, 0, 0]}
+            animationDuration={900}
+            animationEasing="ease-out"
+          >
+            {data.map((_, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={CHART_COLORS[index % CHART_COLORS.length]}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+
+      {/* Keterangan di bawah grafik */}
+      <div className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-3">
+        {data.map((item, index) => {
+          const label = String(item[xKey] ?? "");
+
+          return (
+            <div
+              key={`${label}-${index}`}
+              className="flex items-center gap-2 text-sm"
+            >
+              <span
+                className="h-3 w-3 shrink-0 rounded-sm"
+                style={{
+                  backgroundColor:
+                    CHART_COLORS[index % CHART_COLORS.length],
+                }}
+              />
+
+              <span className="text-muted-foreground">
+                {label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -96,6 +248,7 @@ export function DonutChart({
   data: Datum[];
   nameKey?: string;
   valueKey?: string;
+  percentage?: string;
   height?: number;
 }) {
   return (
@@ -106,7 +259,16 @@ export function DonutChart({
             <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
           ))}
         </Pie>
-        <Tooltip {...tooltipStyle} />
+        <Tooltip
+          formatter={(value: number, _name, props) => {
+            const p = props.payload;
+
+            return [
+              `${value} jiwa (${p.percentage}%)`,
+              p.name,
+            ];
+          }}
+        />
         <Legend wrapperStyle={{ fontSize: 12 }} />
       </PieChart>
     </ResponsiveContainer>
