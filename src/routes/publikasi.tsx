@@ -29,6 +29,7 @@ type Row = {
   judul: string;
   jenis: string;
   file_url: string | null;
+  gambar_url: string | null;
   tanggal_terbit: string | null;
   deskripsi: string | null;
 };
@@ -71,21 +72,46 @@ function Publikasi() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((r) => (
-            <article key={r.id} className="surface-card flex flex-col gap-3 p-5 transition-shadow hover:shadow-md">
-              <div className="flex items-start justify-between gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
-                  <FileText className="size-5" aria-hidden />
-                </span>
-                <Badge variant="secondary">{r.jenis}</Badge>
+            <article
+              key={r.id}
+              className="surface-card overflow-hidden transition-shadow hover:shadow-md"
+            >
+              {/* Gambar */}
+              {r.gambar_url ? (
+                <div className="aspect-[16/9] w-full overflow-hidden bg-muted">
+                  <img
+                    src={r.gambar_url}
+                    alt={r.judul}
+                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+              ) : (
+                <div className="flex aspect-[16/9] w-full items-center justify-center bg-muted text-muted-foreground">
+                  <FileText className="size-10" aria-hidden />
+                </div>
+              )}
+
+              {/* Keterangan */}
+              <div className="flex flex-1 flex-col gap-3 p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <Badge variant="secondary">
+                    {r.jenis}
+                  </Badge>
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-display text-base font-semibold leading-snug">
+                    {r.judul}
+                  </h2>
+
+                  {r.deskripsi ? (
+                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                      {r.deskripsi}
+                    </p>
+                  ) : null}
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="font-display text-sm font-semibold leading-snug">{r.judul}</h2>
-                <p className="mt-1 text-xs text-muted-foreground">Terbit: {formatDate(r.tanggal_terbit)}</p>
-                {r.deskripsi ? <p className="mt-2 line-clamp-3 text-xs text-muted-foreground">{r.deskripsi}</p> : null}
-              </div>
-              <Button size="sm" variant="outline" onClick={() => void openFile(r.file_url)}>
-                <Download className="mr-2 size-4" /> Unduh
-              </Button>
             </article>
           ))}
         </div>
