@@ -1,7 +1,16 @@
 import { useEffect, useRef } from "react";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+// Worker MapLibre di-bundel oleh Vite dan dipasang eksplisit. Tanpa ini, di
+// hosting produksi (mis. Vercel) URL worker default bisa 404 sehingga SEMUA
+// sumber GeoJSON (batas desa + titik RTLH) gagal diproses, walau basemap muncul.
+import maplibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
+// GeoJSON batas desa diimpor (ikut ke bundle) agar tidak bergantung pada
+// fetch ke /geojson/... yang bisa tidak tersedia di hosting produksi.
+import boundaryRaw from "@/assets/jatiadi.geojson?raw";
 import type { FeatureCollection, Point, } from "geojson";
+
+maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
 // =============================================================================
 // Tipe data
@@ -21,7 +30,7 @@ interface RtlhMapProps {
 // Konstanta
 // =============================================================================
 
-const BOUNDARY_URL = "/geojson/jatiadi.geojson";
+const BOUNDARY_GEOJSON = JSON.parse(boundaryRaw) as FeatureCollection;
 const BOUNDARY_SOURCE_ID = "village-boundary";
 const BOUNDARY_FILL_LAYER_ID = "village-boundary-fill";
 const BOUNDARY_OUTLINE_LAYER_ID = "village-boundary-outline";
@@ -222,46 +231,37 @@ export default function RtlhMap({ points }: RtlhMapProps) {
 
       fitToRtlhPoints(map, points);
 
-      // --- Batas desa (opsional, tidak boleh menggagalkan peta kalau gagal) ---
-      fetch(BOUNDARY_URL)
-        .then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status} saat memuat ${BOUNDARY_URL}`);
-          return res.json();
-        })
-        .then((geojson: FeatureCollection) => {
-          map.addSource(BOUNDARY_SOURCE_ID, { type: "geojson", data: geojson });
+      // --- Batas desa (data ikut ke bundle, tidak perlu fetch) ---
+      try {
+        const geojson = BOUNDARY_GEOJSON;
+        map.addSource(BOUNDARY_SOURCE_ID, { type: "geojson", data: geojson });
 
-          // beforeId = RTLH_LAYER_ID -> batas desa digambar DI BAWAH titik RTLH,
-          // supaya titik rumah selalu terlihat di atas.
-          map.addLayer(
-            {
-              id: BOUNDARY_FILL_LAYER_ID,
-              type: "fill",
-              source: BOUNDARY_SOURCE_ID,
-              paint: { "fill-color": "#f97316", "fill-opacity": 0.08 },
-            },
-            RTLH_LAYER_ID
-          );
-          map.addLayer(
-            {
-              id: BOUNDARY_OUTLINE_LAYER_ID,
-              type: "line",
-              source: BOUNDARY_SOURCE_ID,
-              paint: { "line-color": "#dc2626", "line-width": 3 },
-            },
-            RTLH_LAYER_ID
-          );
+        // beforeId = RTLH_LAYER_ID -> batas desa digambar DI BAWAH titik RTLH,
+        // supaya titik rumah selalu terlihat di atas.
+        map.addLayer(
+          {
+            id: BOUNDARY_FILL_LAYER_ID,
+            type: "fill",
+            source: BOUNDARY_SOURCE_ID,
+            paint: { "fill-color": "#f97316", "fill-opacity": 0.08 },
+          },
+          RTLH_LAYER_ID
+        );
+        map.addLayer(
+          {
+            id: BOUNDARY_OUTLINE_LAYER_ID,
+            type: "line",
+            source: BOUNDARY_SOURCE_ID,
+            paint: { "line-color": "#dc2626", "line-width": 3 },
+          },
+          RTLH_LAYER_ID
+        );
 
-          const bounds = boundsFromFeatureCollection(geojson);
-          if (bounds) map.fitBounds(bounds, { padding: 40, duration: 0 });
-        })
-        .catch((error: unknown) => {
-          console.error(
-            `[RtlhMap] Gagal memuat batas desa dari "${BOUNDARY_URL}". ` +
-              `Pastikan file jatiadi.geojson benar-benar ada di folder public/geojson/ pada PROJECT (bukan cuma diunggah ke chat ini). Detail error:`,
-            error
-          );
-        });
+        const bounds = boundsFromFeatureCollection(geojson);
+        if (bounds) map.fitBounds(bounds, { padding: 40, duration: 0 });
+      } catch (error: unknown) {
+        console.error("[RtlhMap] Gagal menampilkan batas desa:", error);
+      }
     });
 
     return () => {
