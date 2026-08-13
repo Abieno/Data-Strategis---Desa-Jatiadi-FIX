@@ -29,9 +29,11 @@ export function StatCard({ label, value, suffix, icon: Icon, tone = "primary", h
   const t = toneClasses[tone];
 
   return (
-    <div className="group surface-card relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
-      <div className={cn("pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-gradient-to-br to-transparent blur-2xl", t.glow)} />
+    <div className="group surface-card shimmer-line relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1">
+      <div className={cn("pointer-events-none absolute -right-10 -top-10 size-32 rounded-full bg-gradient-to-br to-transparent blur-2xl transition-all duration-500 group-hover:scale-125 group-hover:opacity-90", t.glow)} />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-primary to-primary/10 transition-transform duration-500 group-hover:scale-x-100" />
       <div className="relative flex items-start justify-between gap-3">
+
         <div className="min-w-0">
           <p className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
           {loading ? (
@@ -44,9 +46,10 @@ export function StatCard({ label, value, suffix, icon: Icon, tone = "primary", h
           )}
           {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
         </div>
-        <span className={cn("grid size-11 shrink-0 place-items-center rounded-xl transition-transform duration-300 group-hover:scale-110", t.chip)}>
+        <span className={cn("grid size-11 shrink-0 place-items-center rounded-xl shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6", t.chip)}>
           <Icon className="size-5" aria-hidden />
         </span>
+
       </div>
     </div>
   );
